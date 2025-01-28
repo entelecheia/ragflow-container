@@ -95,45 +95,84 @@ make clean
 
 ## Environment Variables
 
+The configuration is managed through environment variables, organized into the following sections:
+
+### General Configuration
+
+- `DOC_ENGINE`: Document engine type (`elasticsearch` or `infinity`)
+- `COMPOSE_PROFILES`: Docker compose profiles based on doc engine type
+
 ### Workspace Configuration
 
-The following environment variables control the workspace directory structure:
-
 - `WORKSPACE_DIR`: Base workspace directory (default: `./workspace`)
-  - Contains all configuration files, logs, and nginx settings
 - `CONFIG_DIR`: Configuration files directory (default: `${WORKSPACE_DIR}/config`)
   - Contains `infinity_conf.toml` and `init.sql`
 - `LOGS_DIR`: Application logs directory (default: `${WORKSPACE_DIR}/logs`)
-  - Contains all service logs
 - `NGINX_DIR`: Nginx configuration directory (default: `${WORKSPACE_DIR}/nginx`)
-  - Contains nginx configuration files
-
-These paths are used to map volumes and configuration files in the Docker containers. You can customize them by setting the corresponding environment variables in your `.env` file.
 
 ### Port Configuration
 
-The following ports are used by different services and can be configured through environment variables:
-
-### RAGFlow Server
+RAGFlow Server:
 
 - `SVR_HTTP_PORT`: Main HTTP API port (default: 9380)
 - `SVR_HTTP_PORT_80`: HTTP port for web interface (default: 80)
 - `SVR_HTTPS_PORT`: HTTPS port for secure access (default: 443)
 
-### Document Storage
+Document Storage:
 
 - `ES_PORT`: Elasticsearch HTTP port (default: 9200)
 - `INFINITY_THRIFT_PORT`: Infinity Thrift API port (default: 23817)
 - `INFINITY_HTTP_PORT`: Infinity HTTP API port (default: 23820)
 - `INFINITY_PSQL_PORT`: Infinity PostgreSQL port (default: 5432)
 
-### Database and Storage
+Database and Storage:
 
 - `MYSQL_PORT`: MySQL database port (default: 3306)
 - `MINIO_PORT`: MinIO API port (default: 9000)
 - `MINIO_CONSOLE_PORT`: MinIO Console port (default: 9001)
 
-To change any of these ports, set the corresponding environment variable in your `.env` file before starting the services.
+### Service Configuration
+
+Elasticsearch:
+
+- `ES_HOST`: Elasticsearch host (default: es01)
+- `ELASTIC_PASSWORD`: Elasticsearch password
+- `STACK_VERSION`: Elasticsearch version (default: 8.11.3)
+
+Infinity:
+
+- `INFINITY_HOST`: Infinity service host (default: infinity)
+
+MySQL:
+
+- `MYSQL_HOST`: MySQL host (default: mysql)
+- `MYSQL_DBNAME`: Database name (default: rag_flow)
+- `MYSQL_PASSWORD`: MySQL password
+
+MinIO:
+
+- `MINIO_HOST`: MinIO host (default: minio)
+- `MINIO_USER`: MinIO username
+- `MINIO_PASSWORD`: MinIO password
+
+### Resource Limits
+
+- `MEM_LIMIT`: Maximum memory limit for containers (default: 8GB)
+
+### RAGFlow Configuration
+
+- `RAGFLOW_IMAGE`: Docker image configuration
+  - Slim edition (default): `infiniflow/ragflow:v0.15.1-slim`
+  - Full edition with models: `infiniflow/ragflow:v0.15.1`
+- `TIMEZONE`: Container timezone (default: Asia/Shanghai)
+- `HF_ENDPOINT`: Optional HuggingFace mirror endpoint
+- `MACOS`: MacOS-specific optimizations (set to 1 for MacOS)
+
+### Logging Configuration
+
+- `LOG_LEVELS`: Log level for RAGFlow packages
+  - Available levels: DEBUG, INFO (default), WARNING, ERROR
+  - Example: `LOG_LEVELS=ragflow.es_conn=DEBUG`
 
 ## Available Make Commands
 
