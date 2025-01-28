@@ -42,7 +42,7 @@ services:
     image: infiniflow/infinity:v0.6.0-dev2
     volumes:
       - infinity_data:/var/infinity
-      - ./infinity_conf.toml:/infinity_conf.toml
+      - ${WORKSPACE_DIR}/config/infinity_conf.toml:/infinity_conf.toml
     command: ["-f", "/infinity_conf.toml"]
     ports:
       - ${INFINITY_THRIFT_PORT}:23817
@@ -83,7 +83,7 @@ services:
       - ${MYSQL_PORT}:3306
     volumes:
       - mysql_data:/var/lib/mysql
-      - ./init.sql:/data/application/init.sql
+      - ${WORKSPACE_DIR}/config/init.sql:/data/application/init.sql
     networks:
       - ragflow
     healthcheck:
@@ -99,7 +99,7 @@ services:
     command: server --console-address ":9001" /data
     ports:
       - ${MINIO_PORT}:9000
-      - ${MINIO_CONSOLE_PORT}:9001
+      - ${MINIO_CONSOLE_PORT:-9001}:9001
     env_file: .env
     environment:
       - MINIO_ROOT_USER=${MINIO_USER}

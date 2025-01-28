@@ -32,89 +32,94 @@ This repository contains a production-ready Docker Compose configuration for run
 ```
 .
 ├── .env                    # Environment variables configuration
-├── docker-compose.yaml     # Docker compose configuration
+├── docker-compose.yml      # Main Docker compose configuration
+├── docker-compose-base.yml # Base Docker compose configuration
+├── docker/                 # Original configuration templates
+│   ├── infinity_conf.toml  # Infinity configuration template
+│   ├── init.sql           # MySQL initialization script template
+│   └── nginx/             # Nginx configuration templates
 ├── Makefile               # Make commands for easy management
-├── workspace/             # Workspace directory
-│   ├── deploy/            # Deployment configurations
-│   │   ├── nginx/        # Nginx configurations and certificates
-│   │   │   └── certs/    # SSL certificates
-│   │   └── pgsql/        # PostgreSQL configurations
-│   │       └── certs/    # PostgreSQL SSL certificates
-│   └── mydata/           # RAGFlow data directory
-│       ├── data          # Application data
-│       ├── export        # Export directory
-│       └── upload        # Upload directory
+├── workspace/             # Workspace directory (configurable via WORKSPACE_DIR)
+│   ├── config/           # Configuration files
+│   │   ├── infinity_conf.toml  # Infinity configuration
+│   │   └── init.sql           # MySQL initialization script
+│   ├── logs/             # Application logs
+│   └── nginx/            # Nginx configurations
 └── README.md             # This documentation
 ```
 
 ## Quick Start
 
-1. Clone this repository:
+1. Initialize the workspace and configuration:
    ```bash
-   git clone https://github.com/infiniflow/ragflow-container.git
-   cd ragflow-container
+   make init
+   ```
+   This will:
+   - Create necessary directories
+   - Copy configuration files to workspace
+   - Create .env file from template if it doesn't exist
+
+2. Edit configuration files as needed:
+   - `.env`: Environment variables
+   - `workspace/config/infinity_conf.toml`: Infinity configuration
+   - `workspace/config/init.sql`: MySQL initialization
+   - `workspace/nginx/*.conf`: Nginx configurations
+
+3. Start the services:
+   ```bash
+   make start
    ```
 
-2. Create workspace directories:
-   ```bash
-   mkdir -p workspace/{config,data,logs,deploy/nginx/{conf.d,certs}}
-   ```
+## Data Storage
 
-3. Copy example configurations:
-   ```bash
-   cp examples/nginx/nginx.conf workspace/deploy/nginx/
-   cp examples/nginx/conf.d/ragflow.conf workspace/deploy/nginx/conf.d/
-   cp .env.example .env
-   ```
+The application uses Docker named volumes for persistent data storage:
+- `esdata01`: Elasticsearch data
+- `infinity_data`: Infinity database data
+- `mysql_data`: MySQL database data
+- `minio_data`: MinIO object storage data
 
-4. Edit the `.env` file to set your desired configuration:
-   - Change default passwords
-   - Configure Elasticsearch settings
-   - Set Redis password
-   - Adjust ports if needed
-
-5. Start the services:
-   ```bash
-   docker compose up -d
-   ```
-
-6. Access RAGFlow:
-   - Web Interface: http://localhost:8080
-   - API Documentation: http://localhost:8080/docs
-   - Health Check: http://localhost:8080/health
-
-## Using the Makefile
-
-The project includes a Makefile for easy management of common tasks:
+These volumes are managed by Docker and persist data across container restarts. You can use the following make commands to manage data:
 
 ```bash
-# Complete setup
-make setup              # Initialize, build, and start services
+# Backup all data volumes
+make backup
 
-# Service management
-make start             # Start all services
-make stop              # Stop all services
-make restart           # Restart all services
-make status            # Show service status
-make update            # Update services to latest version
-
-# Logs
-make logs              # View all logs
-make logs-app          # View RAGFlow logs
-make logs-nginx        # View Nginx logs
-make logs-db           # View Elasticsearch logs
-make logs-redis        # View Redis logs
-
-# Maintenance
-make backup            # Create backup of database and volumes
-make clean             # Remove all containers and volumes
-make fix-permissions   # Fix data directory permissions
+# Clean all data (warning: this will delete all data!)
+make clean
 ```
 
-For a complete list of available commands, run:
-```bash
-make help
-```
+## Environment Variables
+
+### Workspace Configuration
+- `WORKSPACE_DIR`: Base workspace directory (default: ./workspace)
+- `LOGS_DIR`: Logs directory (default: ${WORKSPACE_DIR}/logs)
+- `NGINX_DIR`: Nginx configuration directory (default: ${WORKSPACE_DIR}/nginx)
+
+### Port Configuration
+- `SVR_HTTP_PORT`: Server HTTP port (default: 9380)
+- `SVR_HTTP_PORT_80`: Server HTTP alternate port (default: 80)
+- `SVR_HTTPS_PORT`: Server HTTPS port (default: 443)
+- `ES_PORT`: Elasticsearch port
+- `MYSQL_PORT`: MySQL port
+- `MINIO_PORT`: MinIO API port
+- `MINIO_CONSOLE_PORT`: MinIO Console port (default: 9001)
+
+## Available Make Commands
+
+- `make init`: Initialize workspace and copy configuration files
+- `make start`: Start all services
+- `make stop`: Stop all services
+- `make restart`: Restart all services
+- `make status`: Show status of all services
+- `make logs`: View logs from all services
+- `make logs-app`: View RAGFlow application logs
+- `make logs-nginx`: View Nginx logs
+- `make logs-es`: View Elasticsearch logs
+- `make logs-mysql`: View MySQL logs
+- `make logs-minio`: View MinIO logs
+- `make backup`: Create backup of all data volumes
+- `make clean`: Remove all containers and volumes
+- `make update`: Pull latest images and restart services
 
 ## Security Configuration
 
@@ -130,39 +135,6 @@ Before deploying to production, make sure to:
    - Place SSL certificates in `workspace/deploy/nginx/certs/`
    - Uncomment SSL configuration in `docker-compose.yaml`
    - Update `RAGFLOW_PROTOCOL` to `https` in `.env`
-
-## Environment Variables
-
-See the `.env` file for all available configuration options. Key variables include:
-
-### Authentication Configuration
-- `RAGFLOW_USERNAME`: Admin username (default: admin)
-  - Used for initial admin account creation
-  - Passed directly to RAGFlow on startup
-- `RAGFLOW_PASSWORD`: Admin password
-  - Must be changed from default in production
-  - Passed directly to RAGFlow on startup
-- `RAGFLOW_SECRET_KEY`: Django secret key for session security
-  - Must be changed in production
-  - Used for cryptographic signing
-- `RAGFLOW_DISABLE_SIGNUP_WITHOUT_LINK`: Disable public signups (default: true)
-  - Set to false to allow public user registration
-
-### Port Configuration
-- `NGINX_HTTP_PORT`: HTTP port for web interface (default: 8080)
-- `NGINX_HTTPS_PORT`: HTTPS port for web interface (default: 8081)
-- `APP_PORT`: Internal application port (default: 8000)
-- `ELASTICSEARCH_PORT`: Elasticsearch port (default: 9200)
-- `REDIS_PORT`: Redis port (default: 6379)
-
-### Database Configuration
-- `ELASTICSEARCH_USER`: Elasticsearch username
-- `ELASTICSEARCH_PASSWORD`: Elasticsearch password
-- `ELASTICSEARCH_HOST`: Elasticsearch host
-
-### Cache Configuration
-- `REDIS_HOST`: Redis host
-- `REDIS_PASSWORD`: Redis password
 
 ## Maintenance
 
@@ -185,8 +157,9 @@ View logs using make commands:
 make logs          # All services
 make logs-app      # RAGFlow logs
 make logs-nginx    # Nginx logs
-make logs-db       # Elasticsearch logs
-make logs-redis    # Redis logs
+make logs-es       # Elasticsearch logs
+make logs-mysql    # MySQL logs
+make logs-minio    # MinIO logs
 ```
 
 ## Troubleshooting
