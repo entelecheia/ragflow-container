@@ -33,7 +33,6 @@ This repository contains a production-ready Docker Compose configuration for run
 .
 ├── .env                    # Environment variables configuration
 ├── docker-compose.yml      # Main Docker compose configuration
-├── docker-compose-base.yml # Base Docker compose configuration
 ├── docker/                 # Original configuration templates
 │   ├── infinity_conf.toml  # Infinity configuration template
 │   ├── init.sql           # MySQL initialization script template
