@@ -1,6 +1,6 @@
 # RAGFlow Container
 
-Docker container setup for RAGFlow, a powerful Retrieval-Augmented Generation (RAG) framework.
+Docker container setup for [RAGFlow](https://github.com/infiniflow/ragflow), a powerful Retrieval-Augmented Generation (RAG) framework.
 
 ## Overview
 
