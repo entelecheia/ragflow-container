@@ -51,15 +51,19 @@ This repository contains a production-ready Docker Compose configuration for run
 ## Quick Start
 
 1. Initialize the workspace and configuration:
+
    ```bash
    make init
    ```
+
    This will:
+
    - Create necessary directories
    - Copy configuration files to workspace
    - Create .env file from template if it doesn't exist
 
 2. Edit configuration files as needed:
+
    - `.env`: Environment variables
    - `workspace/config/infinity_conf.toml`: Infinity configuration
    - `workspace/config/init.sql`: MySQL initialization
@@ -73,6 +77,7 @@ This repository contains a production-ready Docker Compose configuration for run
 ## Data Storage
 
 The application uses Docker named volumes for persistent data storage:
+
 - `esdata01`: Elasticsearch data
 - `infinity_data`: Infinity database data
 - `mysql_data`: MySQL database data
@@ -91,18 +96,44 @@ make clean
 ## Environment Variables
 
 ### Workspace Configuration
-- `WORKSPACE_DIR`: Base workspace directory (default: ./workspace)
-- `LOGS_DIR`: Logs directory (default: ${WORKSPACE_DIR}/logs)
-- `NGINX_DIR`: Nginx configuration directory (default: ${WORKSPACE_DIR}/nginx)
+
+The following environment variables control the workspace directory structure:
+
+- `WORKSPACE_DIR`: Base workspace directory (default: `./workspace`)
+  - Contains all configuration files, logs, and nginx settings
+- `CONFIG_DIR`: Configuration files directory (default: `${WORKSPACE_DIR}/config`)
+  - Contains `infinity_conf.toml` and `init.sql`
+- `LOGS_DIR`: Application logs directory (default: `${WORKSPACE_DIR}/logs`)
+  - Contains all service logs
+- `NGINX_DIR`: Nginx configuration directory (default: `${WORKSPACE_DIR}/nginx`)
+  - Contains nginx configuration files
+
+These paths are used to map volumes and configuration files in the Docker containers. You can customize them by setting the corresponding environment variables in your `.env` file.
 
 ### Port Configuration
-- `SVR_HTTP_PORT`: Server HTTP port (default: 9380)
-- `SVR_HTTP_PORT_80`: Server HTTP alternate port (default: 80)
-- `SVR_HTTPS_PORT`: Server HTTPS port (default: 443)
-- `ES_PORT`: Elasticsearch port
-- `MYSQL_PORT`: MySQL port
-- `MINIO_PORT`: MinIO API port
+
+The following ports are used by different services and can be configured through environment variables:
+
+### RAGFlow Server
+
+- `SVR_HTTP_PORT`: Main HTTP API port (default: 9380)
+- `SVR_HTTP_PORT_80`: HTTP port for web interface (default: 80)
+- `SVR_HTTPS_PORT`: HTTPS port for secure access (default: 443)
+
+### Document Storage
+
+- `ES_PORT`: Elasticsearch HTTP port (default: 9200)
+- `INFINITY_THRIFT_PORT`: Infinity Thrift API port (default: 23817)
+- `INFINITY_HTTP_PORT`: Infinity HTTP API port (default: 23820)
+- `INFINITY_PSQL_PORT`: Infinity PostgreSQL port (default: 5432)
+
+### Database and Storage
+
+- `MYSQL_PORT`: MySQL database port (default: 3306)
+- `MINIO_PORT`: MinIO API port (default: 9000)
 - `MINIO_CONSOLE_PORT`: MinIO Console port (default: 9001)
+
+To change any of these ports, set the corresponding environment variable in your `.env` file before starting the services.
 
 ## Available Make Commands
 
@@ -126,6 +157,7 @@ make clean
 Before deploying to production, make sure to:
 
 1. Change all default passwords in `.env`:
+
    - `RAGFLOW_PASSWORD`
    - `ELASTICSEARCH_PASSWORD`
    - `REDIS_PASSWORD`
@@ -141,11 +173,13 @@ Before deploying to production, make sure to:
 ### Backup
 
 Use the make command to create backups:
+
 ```bash
 make backup
 ```
 
 This will:
+
 1. Create a database dump
 2. Create a tar archive of the data directory
 3. Store backups in the `backups` directory
@@ -153,6 +187,7 @@ This will:
 ### Logs
 
 View logs using make commands:
+
 ```bash
 make logs          # All services
 make logs-app      # RAGFlow logs
@@ -165,11 +200,13 @@ make logs-minio    # MinIO logs
 ## Troubleshooting
 
 1. If services fail to start:
+
    ```bash
    make logs
    ```
 
 2. If database connection fails:
+
    - Verify Elasticsearch credentials in `.env`
    - Check if Elasticsearch container is healthy:
      ```bash
