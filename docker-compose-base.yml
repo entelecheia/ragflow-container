@@ -1,0 +1,90 @@
+services:
+  es01:
+    container_name: ragflow-es-01
+    profiles:
+      - elasticsearch
+    image: docker.elastic.co/elasticsearch/elasticsearch:${STACK_VERSION}
+    volumes:
+      - esdata01:/usr/share/elasticsearch/data
+    ports:
+      - ${ES_PORT}:9200
+    env_file: .env
+    environment:
+      - node.name=es01
+      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
+      - bootstrap.memory_lock=false
+      - discovery.type=single-node
+      - xpack.security.enabled=true
+      - xpack.security.http.ssl.enabled=false
+      - xpack.security.transport.ssl.enabled=false
+      - cluster.routing.allocation.disk.watermark.low=5gb
+      - cluster.routing.allocation.disk.watermark.high=3gb
+      - cluster.routing.allocation.disk.watermark.flood_stage=2gb
+      - TZ=${TIMEZONE}
+    mem_limit: ${MEM_LIMIT}
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    healthcheck:
+      test: ["CMD-SHELL", "curl http://localhost:9200"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+    networks:
+      - ragflow
+    restart: unless-stopped
+
+  redis:
+    container_name: ragflow-redis
+    image: redis:${REDIS_VERSION:-7.0.5-alpine}
+    command: redis-server --requirepass ${REDIS_PASSWORD:-}
+    env_file: .env
+    environment:
+      - TZ=${TIMEZONE}
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - ragflow
+    restart: unless-stopped
+
+  nginx:
+    container_name: ragflow-nginx
+    image: nginx:${NGINX_VERSION:-1.23.2-alpine}
+    ports:
+      - "${NGINX_HTTP_PORT:-8080}:80"
+      - "${NGINX_HTTPS_PORT:-8443}:443"
+    volumes:
+      - ./workspace/deploy/nginx/conf.d:/etc/nginx/conf.d
+      - ./workspace/deploy/nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./workspace/deploy/nginx/certs:/etc/nginx/certs
+    environment:
+      - TZ=${TIMEZONE}
+    depends_on:
+      - ragflow
+    networks:
+      - ragflow
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "nginx", "-t"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  esdata01:
+    driver: local
+  redis_data:
+    driver: local
+
+networks:
+  ragflow:
+    name: ragflow-network
+    driver: bridge

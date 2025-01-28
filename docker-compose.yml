@@ -1,0 +1,40 @@
+include:
+  - ./docker-compose-base.yml
+
+services:
+  ragflow:
+    container_name: ragflow-server
+    image: ${RAGFLOW_IMAGE:-entelecheia/ragflow:latest}
+    depends_on:
+      es01:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    ports:
+      - "${APP_PORT:-8000}:8000"
+    volumes:
+      - ./workspace/data:/app/data
+      - ./workspace/logs:/app/logs
+      - ./workspace/config:/app/config
+    env_file: .env
+    environment:
+      - TZ=${TIMEZONE}
+      - ELASTICSEARCH_HOST=es01
+      - ELASTICSEARCH_PORT=9200
+      - ELASTICSEARCH_USER=elastic
+      - ELASTICSEARCH_PASSWORD=${ELASTIC_PASSWORD}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+      - DISABLE_AUTH=${DISABLE_AUTH:-false}
+      - ENABLE_CORS=${ENABLE_CORS:-true}
+      - CORS_ORIGINS=${CORS_ORIGINS:-*}
+    networks:
+      - ragflow
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
