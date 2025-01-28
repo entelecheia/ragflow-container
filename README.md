@@ -51,7 +51,7 @@ This repository contains a production-ready Docker Compose configuration for run
 
 1. Clone this repository:
    ```bash
-   git clone https://github.com/entelecheia/ragflow-container.git
+   git clone https://github.com/infiniflow/ragflow-container.git
    cd ragflow-container
    ```
 

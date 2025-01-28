@@ -4,7 +4,7 @@ include:
 services:
   ragflow:
     container_name: ragflow-server
-    image: ${RAGFLOW_IMAGE:-entelecheia/ragflow:latest}
+    image: ${RAGFLOW_IMAGE:-infiniflow/ragflow:latest}
     depends_on:
       es01:
         condition: service_healthy
@@ -13,9 +13,9 @@ services:
     ports:
       - "${APP_PORT:-8000}:8000"
     volumes:
-      - ./workspace/data:/app/data
-      - ./workspace/logs:/app/logs
-      - ./workspace/config:/app/config
+      - ${WORKSPACE_DATA:-./workspace/data}:/app/data
+      - ${WORKSPACE_LOGS:-./workspace/logs}:/app/logs
+      - ${WORKSPACE_CONFIG:-./workspace/config}:/app/config
     env_file: .env
     environment:
       - TZ=${TIMEZONE}

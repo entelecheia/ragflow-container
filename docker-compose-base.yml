@@ -62,9 +62,9 @@ services:
       - "${NGINX_HTTP_PORT:-8080}:80"
       - "${NGINX_HTTPS_PORT:-8443}:443"
     volumes:
-      - ./workspace/deploy/nginx/conf.d:/etc/nginx/conf.d
-      - ./workspace/deploy/nginx/nginx.conf:/etc/nginx/nginx.conf
-      - ./workspace/deploy/nginx/certs:/etc/nginx/certs
+      - ${NGINX_CONF_DIR:-./workspace/deploy/nginx/conf.d}:/etc/nginx/conf.d
+      - ${NGINX_CONF_FILE:-./workspace/deploy/nginx/nginx.conf}:/etc/nginx/nginx.conf
+      - ${NGINX_CERTS_DIR:-./workspace/deploy/nginx/certs}:/etc/nginx/certs
     environment:
       - TZ=${TIMEZONE}
     depends_on:
