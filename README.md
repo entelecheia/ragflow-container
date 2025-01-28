@@ -101,14 +101,6 @@ The configuration is managed through environment variables, organized into the f
 - `DOC_ENGINE`: Document engine type (`elasticsearch` or `infinity`)
 - `COMPOSE_PROFILES`: Docker compose profiles based on doc engine type
 
-### Workspace Configuration
-
-- `WORKSPACE_DIR`: Base workspace directory (default: `./workspace`)
-- `CONFIG_DIR`: Configuration files directory (default: `${WORKSPACE_DIR}/config`)
-  - Contains `infinity_conf.toml` and `init.sql`
-- `LOGS_DIR`: Application logs directory (default: `${WORKSPACE_DIR}/logs`)
-- `NGINX_DIR`: Nginx configuration directory (default: `${WORKSPACE_DIR}/nginx`)
-
 ### Port Configuration
 
 RAGFlow Server:

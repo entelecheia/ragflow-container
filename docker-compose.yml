@@ -11,10 +11,10 @@ services:
       - ${SVR_HTTP_PORT_80:-80}:80
       - ${SVR_HTTPS_PORT:-443}:443
     volumes:
-      - ${LOGS_DIR}:/ragflow/logs
-      - ${NGINX_DIR}/ragflow.conf:/etc/nginx/conf.d/ragflow.conf
-      - ${NGINX_DIR}/proxy.conf:/etc/nginx/proxy.conf
-      - ${NGINX_DIR}/nginx.conf:/etc/nginx/nginx.conf
+      - ./workspace/logs:/ragflow/logs
+      - ./workspace/nginx/ragflow.conf:/etc/nginx/conf.d/ragflow.conf
+      - ./workspace/nginx/proxy.conf:/etc/nginx/proxy.conf
+      - ./workspace/nginx/nginx.conf:/etc/nginx/nginx.conf
     env_file: .env
     environment:
       - TZ=${TIMEZONE}
@@ -71,7 +71,7 @@ services:
     image: infiniflow/infinity:v0.6.0-dev2
     volumes:
       - infinity_data:/var/infinity
-      - ${WORKSPACE_DIR}/config/infinity_conf.toml:/infinity_conf.toml
+      - ./workspace/config/infinity_conf.toml:/infinity_conf.toml
     command: ["-f", "/infinity_conf.toml"]
     ports:
       - ${INFINITY_THRIFT_PORT}:23817
@@ -112,7 +112,7 @@ services:
       - ${MYSQL_PORT}:3306
     volumes:
       - mysql_data:/var/lib/mysql
-      - ${WORKSPACE_DIR}/config/init.sql:/data/application/init.sql
+      - ./workspace/config/init.sql:/data/application/init.sql
     networks:
       - ragflow
     healthcheck:
